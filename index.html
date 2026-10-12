@@ -173,6 +173,11 @@ function update(){
  $('headcode').setCustomValidity(v('headcode')&&!validHeadcode(v('headcode'))?'Enter a headcode in the format 1M00.':'');
  ['unit','pvn'].forEach(id=>$(id).setCustomValidity(v(id)&&!/^[0-9]{6}$/.test(v(id))?'Enter exactly six digits.':''));
 }
+function buildReport(){
+ const report=buildReport();
+ $('preview').textContent=report||'Complete the red question fields to generate your report.';
+ $('reportSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
 function generate(){
  const report=buildReport();
  $('preview').textContent=report||'Complete the red question fields to generate your report.';
@@ -191,8 +196,9 @@ function updateForceVisibility(){
 $('policeType').addEventListener('change',()=>{updateForceVisibility();update();});
 
 
+
 function hasGeneratedReport(){
- const text=$('preview').textContent.trim();
+ const text=$('preview')?.textContent?.trim() || '';
  return !!text && !text.startsWith('Complete the red question fields');
 }
 function copyText(text){
@@ -201,39 +207,75 @@ function copyText(text){
  }
  return new Promise((resolve,reject)=>{
    const ta=document.createElement('textarea');
-   ta.value=text;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';
-   document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,ta.value.length);
+   ta.value=text;ta.setAttribute('readonly','');
+   ta.style.position='fixed';ta.style.left='-9999px';ta.style.top='0';
+   document.body.appendChild(ta);ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);
    let ok=false;try{ok=document.execCommand('copy');}catch(e){}
    ta.remove();ok?resolve():reject(new Error('Clipboard copy was blocked'));
  });
 }
+function reportText(){
+ return ($('preview')?.innerText || $('preview')?.textContent || '').trim();
+}
+function generate(){
+ try{
+   if(typeof buildReport === 'function') buildReport();
+   else if(typeof renderReport === 'function') renderReport();
+   else if(typeof makeReport === 'function') makeReport();
+   else {
+     // Retain compatibility with the original generator function if named differently.
+     const preview=$('preview');
+     if(preview && (!preview.textContent.trim() || preview.textContent.trim().startsWith('Complete the red question fields'))){
+       preview.textContent='Complete the report fields, then select Generate report.';
+     }
+   }
+ }catch(err){
+   console.error('Report generation failed:',err);
+   alert('The report could not be generated. Please check the fields and try again.');
+ }
+}
 async function copyReport(){
  if(!hasGeneratedReport()){alert('Generate a report before copying.');return;}
- try{await copyText($('preview').textContent.trim());alert('Report copied to clipboard.');}
- catch(e){alert('Clipboard access was blocked by the browser. Try using the browser menu or open the app over HTTPS.');}
+ try{await copyText(reportText());alert('Report copied to clipboard.');}
+ catch(err){console.error(err);alert('Clipboard access was blocked. Open the app over HTTPS or use the browser clipboard permissions.');}
 }
-$('generate').addEventListener('click',generate);
-$('copy').addEventListener('click',copyReport);
-
-$('print').addEventListener('click',()=>{
+function printReport(){
  if(!hasGeneratedReport()){alert('Generate a report before printing or saving as PDF.');return;}
  window.print();
-});
-$('email').addEventListener('click',()=>{
+}
+function emailReport(){
  if(!hasGeneratedReport()){alert('Generate a report before emailing.');return;}
- const report=$('preview').textContent.trim();
+ const report=reportText();
  const subject=encodeURIComponent('Staff Incident Report'+(v('headcode')?' - '+v('headcode').toUpperCase():''));
  const body=encodeURIComponent(report);
  window.location.href='mailto:?subject='+subject+'&body='+body;
-});
-$('clear').addEventListener('click',()=>{
+}
+function clearReport(){
  if(!confirm('Clear all report fields? This cannot be undone.'))return;
- ids.forEach(id=>{const el=$(id);if(el)el.value='';});
- $('preview').textContent='Complete the red question fields, then select Generate report.';
- const now=new Date();
- $('date').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
- updateForceVisibility();update();window.scrollTo({top:0,behavior:'smooth'});
-});
+ if(Array.isArray(ids)){
+   ids.forEach(id=>{const el=$(id);if(el)el.value='';});
+ }else{
+   document.querySelectorAll('input,textarea,select').forEach(el=>{
+     if(el.type==='checkbox'||el.type==='radio')el.checked=false;
+     else if(el.type!=='button'&&el.type!=='submit')el.value='';
+   });
+ }
+ const date=$('date');
+ if(date){
+   const now=new Date();
+   date.value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+ }
+ const preview=$('preview');
+ if(preview)preview.textContent='Complete the red question fields, then select Generate report.';
+ if(typeof updateForceVisibility==='function')updateForceVisibility();
+ if(typeof update==='function')update();
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+$('generate').addEventListener('click',generate);
+$('copy').addEventListener('click',copyReport);
+$('print').addEventListener('click',printReport);
+$('email').addEventListener('click',emailReport);
+$('clear').addEventListener('click',clearReport);
 
 const today=new Date();$('date').value=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
