@@ -39,13 +39,15 @@ dialog{width:min(560px,calc(100% - 24px));border:0;border-radius:16px;padding:0;
 <div class="progress"><span id="progressBar"></span></div><div class="small" id="progressText">0% complete</div></div>
 <div class="form-area">
 <section><h2>1 · Incident and duty details</h2><div class="grid">
-<div class="field"><label for="date">Date (DD/MM/YYYY)</label><input id="date" placeholder="DD/MM/YYYY" inputmode="numeric"></div>
-<div class="field"><label for="time">Approximate time (HH:MM)</label><input id="time" placeholder="HH:MM" inputmode="numeric"></div>
+<div class="field"><label for="date">Date (DD/MM/YYYY)</label><input id="date" type="date"></div>
+<div class="field"><label for="time">Approximate time (HH:MM)</label><input id="time" type="time"></div>
 <div class="field full"><label for="activity">What were you doing? (ACTIVITY / ASSISTING ON / WORKING)</label><select id="activity"><option value="">Select if known</option><option>carrying out duties on</option><option>assisting on</option><option>working</option></select></div>
-<div class="field"><label for="trainTime">Train origin time</label><input id="trainTime" placeholder="HH:MM"></div>
+<div class="field"><label for="trainTime">Train origin time</label><input id="trainTime" type="time"></div>
 <div class="field"><label for="origin">Origin</label><input id="origin" placeholder="Origin station"></div>
 <div class="field"><label for="destination">Destination</label><input id="destination" placeholder="Destination station"></div>
 <div class="field"><label for="headcode">Headcode</label><input id="headcode" maxlength="4" placeholder="1V50"></div>
+<div class="field"><label for="unit">Unit number (6 digits)</label><input id="unit" inputmode="numeric" type="text" maxlength="6" pattern="[0-9]{6}" placeholder="123456"></div>
+<div class="field"><label for="pvn">PVN (6 digits)</label><input id="pvn" inputmode="numeric" type="text" maxlength="6" pattern="[0-9]{6}" placeholder="123456"></div>
 <div class="field"><label for="turn">Train Manager turn</label><input id="turn" placeholder="Turn number"></div>
 <div class="field"><label for="startLocation">I work this train from</label><input id="startLocation" placeholder="Start location"></div>
 <div class="field"><label for="endLocation">To</label><input id="endLocation" placeholder="End location"></div>
@@ -80,8 +82,10 @@ dialog{width:min(560px,calc(100% - 24px));border:0;border-radius:16px;padding:0;
 <div class="field full"><label for="impact">Service impact / delays</label><textarea id="impact" placeholder="Any delay or impact to the service"></textarea></div>
 <div class="field full"><label for="rescue">Customer Rescue Pack / termination / diversion / stopping order</label><textarea id="rescue" placeholder="Record any relevant action, or leave blank"></textarea></div>
 <div class="field full"><label for="closing">Closing remarks and what happened afterwards</label><textarea id="closing" placeholder="Follow-up, outcome or any further information"></textarea></div>
-<div class="field"><label for="btp">Did BTP / local police attend?</label><select id="btp"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option><option value="unknown">Unknown</option></select></div>
-<div class="field full"><label for="attendance">BTP / emergency services / Network Rail attendance details</label><textarea id="attendance" placeholder="Name, rank, station, force, incident/crime number, attendance and actions"></textarea></div>
+<div class="field"><label for="policeAttended">Did police attend?</label><select id="policeAttended"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option><option value="unknown">Unknown</option></select></div>
+<div class="field"><label for="policeType">Police type</label><select id="policeType"><option value="">Select if applicable</option><option value="BTP">British Transport Police (BTP)</option><option value="Civilian">Civilian / Home Office police</option><option value="Both">Both BTP and Home Office police</option></select></div>
+<div class="field" id="forceField" hidden><label for="force">Which Force?</label><input id="force" placeholder="e.g. Northumbria Police"></div>
+<div class="field full"><label for="attendance">Police / emergency services / Network Rail attendance details</label><textarea id="attendance" placeholder="Name, rank, station, incident/crime number, attendance and actions"></textarea></div>
 
 </div></section>
 </div>
@@ -89,16 +93,16 @@ dialog{width:min(560px,calc(100% - 24px));border:0;border-radius:16px;padding:0;
 <div class="sticky-actions no-print"><div class="actions"><button class="btn primary" id="generateBottom">Generate report</button><button class="btn gold" id="copyBottom">Copy report</button></div></div>
 <footer>XC Staff Report Writer · Template-based report drafting tool · Check all details for accuracy before submission.</footer>
 </main>
-<dialog id="missingDialog"><div class="modal-head"><strong>Review missing details</strong><div class="small" style="color:#fff">You can add information now or dismiss each prompt. Dismissed fields remain blank and are not invented.</div></div><div class="modal-body"><div id="missingList"></div><div class="actions"><button class="btn primary" id="applyMissing">Use entered details</button><button class="btn light" id="dismissAll">Dismiss without additional information</button><button class="btn light" id="closeMissing">Close</button></div></div></dialog>
+<dialog id="missingDialog"><div class="modal-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><strong>Review missing details</strong><div class="small" style="color:#fff">You can add information now or dismiss each prompt. Dismissed fields remain blank and are not entered.</div></div></div><div class="modal-body"><div class="actions" style="margin-top:0;margin-bottom:12px"><button class="btn primary" id="applyMissingTop">Add information</button><button class="btn light" id="dismissAllTop">Dismiss/Close without additional info</button></div><div id="missingList"></div><div class="actions"><button class="btn primary" id="applyMissing">Add information</button><button class="btn light" id="dismissAll">Dismiss/Close without additional info</button></div></div></dialog>
 <script>
-const ids=['date','time','activity','trainTime','origin','destination','headcode','turn','startLocation','endLocation','colleagues','others','carriages','type','formation','position','station','platform','journey','travellingFrom','travellingTo','account','peopleDescription','identification','witnesses','bwv','camera','bwvNotes','impact','rescue','closing','btp','attendance'];
+const ids=['date','time','activity','trainTime','origin','destination','headcode','unit','pvn','turn','startLocation','endLocation','colleagues','others','carriages','type','formation','position','station','platform','journey','travellingFrom','travellingTo','account','peopleDescription','identification','witnesses','bwv','camera','bwvNotes','impact','rescue','closing','policeAttended','policeType','force','attendance'];
 const $=id=>document.getElementById(id);
 function v(id){const el=$(id);if(!el)return '';return (el.value||'').trim();}
 function clean(s){return s.replace(/\s+/g,' ').trim();}
 function sentence(s){s=clean(s);if(!s)return '';return /[.!?]$/.test(s)?s:s+'.';}
 function buildReport(){
  const p=[];
- const date=v('date'), time=v('time'), activity=v('activity'), trainTime=v('trainTime'), origin=v('origin'), destination=v('destination'), headcode=v('headcode'), turn=v('turn');
+ const date=v('date')?v('date').split('-').reverse().join('/'):'' , time=v('time'), activity=v('activity'), trainTime=v('trainTime'), origin=v('origin'), destination=v('destination'), headcode=v('headcode'), turn=v('turn');
  // Never generate placeholders or inferred text for missing fields.
  if(date || time || activity || trainTime || origin || destination || headcode || turn){
    let opening='';
@@ -113,6 +117,8 @@ function buildReport(){
    if(turn)opening+=(opening?' as part of ':'')+'Train Manager Turn '+turn;
    if(opening)p.push(sentence(opening));
  }
+ if(v('unit'))p.push(sentence('Unit number: '+v('unit')));
+ if(v('pvn'))p.push(sentence('PVN: '+v('pvn')));
  if(v('startLocation')&&v('endLocation'))p.push(sentence('I work this train from '+v('startLocation')+' to '+v('endLocation')));
  if(v('colleagues'))p.push(sentence('I was working alongside '+v('colleagues')));
  if(v('others'))p.push(sentence('Also involved was '+v('others')));
@@ -143,11 +149,21 @@ function buildReport(){
  if(v('impact'))p.push(sentence('The service impact was: '+v('impact')));
  if(v('rescue'))p.push(sentence(v('rescue')));
  if(v('closing'))p.push(sentence('Closing remarks / outcome: '+v('closing')));
- if(v('btp')==='yes'){
-   p.push(sentence('BTP / local police attended'+(v('attendance')?': '+v('attendance'):'')));
- }else if(v('btp')==='no'){
-   p.push('BTP / local police did not attend.'+(v('attendance')?' '+sentence(v('attendance')):''));
- }else if(v('attendance'))p.push(sentence('Emergency services / Network Rail attendance: '+v('attendance')));
+ if(v('policeAttended')==='yes'){
+   let police='Police attended';
+   if(v('policeType'))police+=' ('+v('policeType')+')';
+   if(v('force'))police+='. Force: '+v('force');
+   if(v('attendance'))police+='. '+v('attendance');
+   p.push(sentence(police));
+ }else if(v('policeAttended')==='no'){
+   p.push('Police did not attend'+(v('attendance')?'. '+sentence(v('attendance')):''));
+ }else if(v('policeType')||v('force')||v('attendance')){
+   let attendance=[];
+   if(v('policeType'))attendance.push('Police type: '+v('policeType'));
+   if(v('force'))attendance.push('Force: '+v('force'));
+   if(v('attendance'))attendance.push(v('attendance'));
+   p.push(sentence('Police / emergency services / Network Rail attendance: '+attendance.join('. ')));
+ }
 
  return p.join('\n\n');
 }
@@ -156,9 +172,21 @@ function update(){
  $('progressBar').style.width=Math.round(filled/ids.length*100)+'%';
  $('progressText').textContent=Math.round(filled/ids.length*100)+'% of fields completed';
  const report=buildReport();$('preview').textContent=report||'Complete the red question fields to generate your report.';
+ $('headcode').setCustomValidity(v('headcode')&&!validHeadcode(v('headcode'))?'Enter a headcode in the format 1M00.':'');
+ ['unit','pvn'].forEach(id=>$(id).setCustomValidity(v(id)&&!/^[0-9]{6}$/.test(v(id))?'Enter exactly six digits.':''));
 }
 ids.forEach(id=>$(id).addEventListener('input',update));
 $('headcode').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^0-9A-Z]/g,'').slice(0,4);});
+function validHeadcode(value){return /^[0-9][A-Z][0-9]{2}$/.test(value);}
+['unit','pvn'].forEach(id=>$(id).addEventListener('input',e=>{e.target.value=e.target.value.replace(/\\D/g,'').slice(0,6);}));
+function updateForceVisibility(){
+ const type=v('policeType');
+ const show=type==='Civilian'||type==='Both';
+ $('forceField').hidden=!show;
+ if(!show){$('force').value='';}
+}
+$('policeType').addEventListener('change',()=>{updateForceVisibility();update();});
+
 function missingFields(){
  return ids.filter(id=>!v(id)).map(id=>{
    const field=$(id), label=document.querySelector('label[for="'+id+'"]');
@@ -173,10 +201,7 @@ function openMissing(){
    const strong=document.createElement('strong');strong.textContent=title;
    const para=document.createElement('p');para.textContent=desc;
    const area=document.createElement('textarea');area.placeholder='Add information (optional)';area.dataset.target=id;
-   const row=document.createElement('div');row.className='actions';
-   const add=document.createElement('button');add.className='btn gold';add.textContent='Add information';add.onclick=()=>{if(area.value.trim()){$(id).value=area.value.trim();update();wrap.remove();}};
-   const dismiss=document.createElement('button');dismiss.className='btn light';dismiss.textContent='Dismiss without additional information';dismiss.onclick=()=>wrap.remove();
-   row.append(add,dismiss);wrap.append(strong,para,area,row);list.append(wrap);
+   wrap.append(strong,para,area);list.append(wrap);
  });
  $('missingDialog').showModal();
 }
@@ -185,14 +210,19 @@ function fallbackCopy(text){const ta=document.createElement('textarea');ta.value
 function generate(){update();openMissing();}
 $('generate').onclick=generate;$('generateBottom').onclick=generate;
 $('copy').onclick=copyReport;$('copyBottom').onclick=copyReport;
-$('applyMissing').onclick=()=>{document.querySelectorAll('#missingList textarea[data-target]').forEach(el=>{if(el.value.trim())$(el.dataset.target).value=el.value.trim();});$('missingDialog').close();update();};
-$('dismissAll').onclick=()=>{$('missingDialog').close();update();};
+function applyMissingInfo(){document.querySelectorAll('#missingList textarea[data-target]').forEach(el=>{if(el.value.trim())$(el.dataset.target).value=el.value.trim();});$('missingDialog').close();update();}
+function dismissMissingInfo(){$('missingDialog').close();update();}
+$('applyMissing').onclick=applyMissingInfo;
+$('applyMissingTop').onclick=applyMissingInfo;
+$('dismissAll').onclick=dismissMissingInfo;
+$('dismissAllTop').onclick=dismissMissingInfo;
 $('closeMissing').onclick=()=>$('missingDialog').close();
+
 $('download').onclick=()=>{const blob=new Blob([buildReport()],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='XC-Staff-Report-'+(v('date').replaceAll('/','')||'draft')+'.txt';a.click();URL.revokeObjectURL(a.href);};
 $('print').onclick=()=>window.print();
 $('email').onclick=()=>{const subject=encodeURIComponent('Staff Incident Report'+(v('headcode')?' - '+v('headcode').toUpperCase():''));const body=encodeURIComponent(buildReport());location.href='mailto:?subject='+subject+'&body='+body;};
-$('clear').onclick=()=>{if(confirm('Clear all report fields? This cannot be undone.')){ids.forEach(id=>{$(id).value='';});update();window.scrollTo({top:0,behavior:'smooth'});}};
-$('date').value=new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date());
+$('clear').onclick=()=>{if(confirm('Clear all report fields? This cannot be undone.')){ids.forEach(id=>{$(id).value='';});$('date').value=`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;update();window.scrollTo({top:0,behavior:'smooth'});}};
+const today=new Date();$('date').value=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 update();
 </script>
