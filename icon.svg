@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b20a3b"/><stop offset="1" stop-color="#760025"/></linearGradient><linearGradient id="train" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#e7e9ed"/></linearGradient></defs>
+<rect width="512" height="512" rx="100" fill="url(#bg)"/>
+<!-- A4 report sheet -->
+<path d="M55 70 Q55 55 70 55 H274 L326 108 V365 Q326 380 311 380 H70 Q55 380 55 365Z" fill="#fff" stroke="#f2dfe5" stroke-width="5"/>
+<path d="M274 55 V94 Q274 108 289 108 H326" fill="#e7e7e7"/>
+<path d="M83 128 H285 M83 155 H285 M83 182 H260 M83 209 H285 M83 236 H245 M83 263 H276 M83 290 H235" stroke="#b6bbc2" stroke-width="9" stroke-linecap="round"/>
+<path d="M82 94 H185" stroke="#a50034" stroke-width="12" stroke-linecap="round"/>
+<!-- Pencil -->
+<g transform="translate(284 184) rotate(38)"><rect x="0" y="0" width="32" height="155" rx="5" fill="#f4c542" stroke="#292929" stroke-width="5"/><path d="M0 0 L16 -28 L32 0Z" fill="#f0d0a0" stroke="#292929" stroke-width="5"/><path d="M12 -20 L16 -28 L20 -20Z" fill="#292929"/><rect x="0" y="127" width="32" height="15" fill="#d5d7dc"/><path d="M0 151 H32" stroke="#292929" stroke-width="5"/></g>
+<!-- XC Voyager train -->
+<g transform="translate(225 338)">
+<path d="M5 65 L15 20 Q22 0 47 0 H238 Q261 0 270 24 L286 65Z" fill="url(#train)" stroke="#202124" stroke-width="7"/>
+<path d="M29 25 Q33 12 48 12 H247 Q258 12 264 29 L268 42 H23Z" fill="#303b4a"/>
+<path d="M18 49 H277 L284 65 H8Z" fill="#f4c542"/>
+<path d="M18 58 H281" stroke="#a50034" stroke-width="7"/>
+<path d="M38 20 H83 V39 H31Z M91 20 H133 V39 H91Z M141 20 H183 V39 H141Z M191 20 H232 V39 H191Z" fill="#9bc3d8"/>
+<circle cx="57" cy="70" r="16" fill="#202124" stroke="#fff" stroke-width="5"/><circle cx="239" cy="70" r="16" fill="#202124" stroke="#fff" stroke-width="5"/>
+<text x="151" y="57" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="19" fill="#a50034">XC</text>
+</g>
+<!-- Police helmet badge, foreground -->
+<g transform="translate(66 300)">
+<path d="M12 58 Q13 17 53 6 Q93 17 94 58 L81 70 H25Z" fill="#172b4d" stroke="#fff" stroke-width="5"/>
+<path d="M9 57 Q52 44 98 57 L94 70 Q52 81 13 70Z" fill="#f4c542" stroke="#202124" stroke-width="4"/>
+<path d="M34 37 Q53 26 72 37 L68 53 H38Z" fill="#fff"/>
+<path d="M47 34 V51 M59 34 V51" stroke="#a50034" stroke-width="4"/>
+<path d="M22 17 Q52 -1 83 17" fill="none" stroke="#f4c542" stroke-width="5" stroke-linecap="round"/>
+</g>
+</svg>

@@ -1,0 +1,20 @@
+{
+  "id": "/SMSF003GEN/",
+  "name": "SMSF003GEN Staff Report Writer",
+  "short_name": "SMSF003GEN",
+  "description": "Question-led staff report writing tool",
+  "start_url": "/SMSF003GEN/",
+  "scope": "/SMSF003GEN/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f4f6",
+  "theme_color": "#a50034",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
